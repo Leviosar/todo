@@ -10,6 +10,7 @@ void main() {
         Bloc((i) => TodoBloc())
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: App(),
         theme: ThemeData(
           hintColor: Colors.blue,

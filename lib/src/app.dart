@@ -22,14 +22,20 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('To do', style: TextStyle(color: Colors.white)),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.add), onPressed: () {}, color: Colors.white)
-        ],
+        title: Text('Procrastinalist', style: TextStyle(color: Colors.white)),
         backgroundColor: pallette.secondary,
         centerTitle: true,
       ),
       body: this.buildBody(),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          BlocProvider.getBloc<TodoBloc>().addTask(this.addInput.text);
+          this.addInput.text = '';
+        },
+        backgroundColor: Theme.of(context).accentColor
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -49,12 +55,6 @@ class _AppState extends State<App> {
                   ),
                 ),
               ),
-              RaisedButton(
-                child: Text("Add"),
-                onPressed: () => BlocProvider.getBloc<TodoBloc>().addTask(this.addInput.text),
-                color: pallette.secondary,
-                textColor: Colors.white,
-              )
             ],
           ),
         ),
@@ -93,7 +93,7 @@ class _AppState extends State<App> {
       ),
       direction: DismissDirection.startToEnd,
       key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-      onDismissed: (DismissDirection direction) => this.onDismiss(direction, index, tasks[index]),
+      onDismissed: (DismissDirection direction) => this.onDismiss(context, direction, index, tasks[index]),
       child: CheckboxListTile(
         title: Text(tasks[index].title),
         value: tasks[index].status,
@@ -101,13 +101,15 @@ class _AppState extends State<App> {
           BlocProvider.getBloc<TodoBloc>().toggleTaskStatus(index);
         },
         secondary: CircleAvatar(
+          foregroundColor: tasks[index].status ? Colors.white : Colors.white,
+          backgroundColor: tasks[index].status ? this.pallette.success : this.pallette.warning,
           child: Icon(tasks[index].status ? Icons.check : Icons.error),
         ),
       ),
     );
   }
 
-  void onDismiss(DismissDirection direction, int index, Task task) async {
+  void onDismiss(BuildContext context, DismissDirection direction, int index, Task task) async {
     BlocProvider.getBloc<TodoBloc>().removeTask(index);
 
     final snack = SnackBar(

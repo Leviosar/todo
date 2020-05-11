@@ -16,6 +16,29 @@ class TodoBloc extends BlocBase {
     tasks.add([]);
     lastRemoved.add(null);
     lastRemovedIndex.add(0);
+    this.loadData();
+  }
+
+  void loadData() async {
+    List<dynamic> loadedData = json.decode(await this.readData()) as List<dynamic>;
+    if (loadedData.length > 0) {
+      List<Task> taskList = loadedData.map((item) => Task.fromJson(item)).toList();
+      this.tasks.add(taskList);
+    }
+  }
+
+  Future<String> taskListToString() async {
+    List<Task> currentTasks = await this.tasks.first;
+    String output = "[";
+
+    for (var i = 0; i < currentTasks.length; i++) {
+      output += currentTasks[i].toString();
+      if (i == currentTasks.length - 1) output += ",";
+    }
+
+    output += "]";
+
+    return output;
   }
 
   Future<File> getFile() async{
@@ -46,7 +69,8 @@ class TodoBloc extends BlocBase {
 
   void removeTask(int index) async {
     List<Task> currentTasks = await this.tasks.first;
-    currentTasks.removeAt(index);
+    this.lastRemoved.add(currentTasks.removeAt(index));
+    this.lastRemovedIndex.add(index);
     this.tasks.add(currentTasks);
     this.saveData();
   }
